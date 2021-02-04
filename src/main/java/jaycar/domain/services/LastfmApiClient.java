@@ -70,22 +70,64 @@ public class LastfmApiClient implements RemoteApiClient {
     }
 
     @Override
-    public ArtistSearchResult getArtistSearch(String query) throws RestClientException, XMLStreamException, IOException {
+    public String getArtistSearch(String query, String limit) throws RestClientException, XMLStreamException, IOException {
 
         String response = restTemplate.getForObject(apiUrl
                 + "?method=artist.search"
                 + "&artist=" + query
+                + "&limit=" + limit
+                + "&format=json"
                 + "&api_key=" + apiKey, String.class);
 
 
-        response = fixXml(response, "results", true);
+        //response = fixXml(response, "results", true);
 
-        LfmArtistSearchResult lfmArtistSearchResult = xmlMapper.readValue(response, LfmArtistSearchResult.class);
+        //LfmArtistSearchResult lfmArtistSearchResult = xmlMapper.readValue(response, LfmArtistSearchResult.class);
 
-        ArtistSearchResult artistSearchResult = modelDataMapper.map(lfmArtistSearchResult);
-
-        return artistSearchResult;
+        return response;
     }
+
+    @Override
+    public String getArtistInfo(String query) throws RestClientException, XMLStreamException, IOException {
+
+        String response = restTemplate.getForObject(apiUrl
+                + "?method=artist.getinfo"
+                + "&artist=" + query
+                + "&format=json"
+                + "&api_key=" + apiKey, String.class);
+
+
+        return response;
+    }
+
+    @Override
+    public String getArtistTopAlbums(String query) throws RestClientException, XMLStreamException, IOException {
+
+        String response = restTemplate.getForObject(apiUrl
+                + "?method=artist.gettopalbums"
+                + "&artist=" + query
+                + "&format=json"
+                + "&api_key=" + apiKey, String.class);
+
+
+        return response;
+    }
+
+
+    @Override
+    public String getAlbumInfo(String query, String other) throws RestClientException, XMLStreamException, IOException {
+
+        String response = restTemplate.getForObject(apiUrl
+                + "?method=album.getinfo"
+                + "&artist=" + query
+                + "&album=" + other
+                + "&format=json"
+                + "&api_key=" + apiKey, String.class);
+
+        return response;
+    }
+
+
 
     @Override
     public AlbumSearchResult getAlbumSearch(String query) throws RestClientException, XMLStreamException, IOException {
@@ -121,39 +163,7 @@ public class LastfmApiClient implements RemoteApiClient {
         return trackSearchResult;
     }
 
-    @Override
-    public Artist getArtistInfo(String query) throws RestClientException, XMLStreamException, IOException {
 
-        String response = restTemplate.getForObject(apiUrl
-                + "?method=artist.getinfo"
-                + "&artist=" + query
-                + "&api_key=" + apiKey, String.class);
-
-        response = fixXml(response, "artist", false);
-
-        LfmArtist lfmArtist = xmlMapper.readValue(response, LfmArtist.class);
-
-        Artist artist = modelDataMapper.map(lfmArtist);
-
-        return artist;
-    }
-
-    @Override
-    public Album getAlbumInfo(String query) throws RestClientException, XMLStreamException, IOException {
-
-        String response = restTemplate.getForObject(apiUrl
-                + "?method=album.getinfo"
-                + "&artist=" + query
-                + "&api_key=" + apiKey, String.class);
-
-        response = fixXml(response, "album", false);
-
-        LfmAlbum lfmAlbum = xmlMapper.readValue(response, LfmAlbum.class);
-
-        Album album = modelDataMapper.map(lfmAlbum);
-
-        return album;
-    }
 
     @Override
     public Track getTrackInfo(String query) throws RestClientException, XMLStreamException, IOException {

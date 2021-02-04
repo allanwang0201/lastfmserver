@@ -77,6 +77,11 @@
 			<artifactId>hibernate-search-orm</artifactId>
 			<version>5.9.2.Final</version>
 		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20180813</version>
+		</dependency>
 	</dependencies>
 	
 	<properties>
@@ -89,6 +94,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<jvmArguments>
+						-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005
+					</jvmArguments>
 				    <addResources>true</addResources>
 				</configuration>
 			</plugin>

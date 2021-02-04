@@ -1,5 +1,6 @@
 package jaycar.web;
 import jaycar.domain.model.entity.*;
+import jaycar.domain.remote.lastfm.entity.LfmArtistSearchResult;
 import jaycar.domain.services.api.RemoteApiClient;
 import jaycar.security.entities.user.entity.UserPublicInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,15 +10,16 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.List;
-
+import java.util.Map;
+import org.json.JSONObject;
+import org.json.XML;
+import org.json.JSONException;
+@CrossOrigin
 @RestController
 @RequestMapping(value="/api")
 public class PublicRestController {
@@ -32,23 +34,42 @@ public class PublicRestController {
 	@Autowired
     EntityManagerFactory entityManagerFactory;
 
-	@RequestMapping(value = "/getArtistSearch")
-	@Cacheable("artistSearchCache")
-	public String getArtistSearch(@RequestParam(value = "query", required = true) String query) throws Exception {
+    @RequestMapping
+    public String all(@RequestParam Map<String,String> allRequestParams) {
 
-		try {
+        String method = allRequestParams.get("method");
+        String artist = allRequestParams.get("artist");
 
-			ArtistSearchResult searchResult = remoteApiClient.getArtistSearch(query);
-			String json = jsonMapper.writeValueAsString(searchResult);
-			return json;
+        try {
+            if(method.equals("artist.search")){
+                String limit = allRequestParams.get("limit");
+                return remoteApiClient.getArtistSearch(artist, limit);
+            }
+            else if(method.equals("artist.getinfo")){
+                return remoteApiClient.getArtistInfo(artist);
+            }
+            else if(method.equals("artist.gettopalbums")){
+                return remoteApiClient.getArtistTopAlbums(artist);
+            }
+            else if(method.equals("album.getinfo")){
+                String album = allRequestParams.get("album");
+                return remoteApiClient.getAlbumInfo(artist, album);
 
-		} catch (Exception e) {
+            }
+            else if(method.equals("artist.search")){
 
-			System.err.println(e);
-			return null;
+            }
 
-		}
-	}
+        } catch (Exception e) {
+
+            System.err.println(e);
+            return null;
+
+        }
+
+        return null;
+    }
+
 
 	@RequestMapping(value = "/getAlbumSearch")
     @Cacheable("albumSearchCache")
@@ -86,41 +107,6 @@ public class PublicRestController {
         }
     }
 
-    @RequestMapping(value = "/getArtistInfo")
-    @Cacheable("artistInfoCache")
-    public String getArtistInfo(@RequestParam(value = "query", required = true) String query) throws Exception {
-
-        try {
-
-            Artist artist = remoteApiClient.getArtistInfo(query);
-            String json = jsonMapper.writeValueAsString(artist);
-            return json;
-
-        } catch (Exception e) {
-
-            System.err.println(e);
-            return null;
-
-        }
-    }
-
-    @RequestMapping(value = "/getAlbumInfo")
-    @Cacheable("albumInfoCache")
-    public String getAlbumInfo(@RequestParam(value = "query", required = true) String query) throws Exception {
-
-        try {
-
-            Album album = remoteApiClient.getAlbumInfo(query);
-            String json = jsonMapper.writeValueAsString(album);
-            return json;
-
-        } catch (Exception e) {
-
-            System.err.println(e);
-            return null;
-
-        }
-    }
 
     @RequestMapping(value = "/getTrackInfo")
     @Cacheable("trackInfoCache")
